@@ -1,0 +1,11 @@
+Howdy.
+
+This accompanies "Who Writes Wikipedia", if you'd like to reproduce the results at home.
+Get your 7zip data from http://dumps.wikimedia.org/enwiki/20110317/
+and your Ruby Enterprise Edition from http://rubyenterpriseedition.com/download.html
+and SQLite from http://www.sqlite.org/download.html
+and you're good to go.
+
+Cheers,
+Lee
+
