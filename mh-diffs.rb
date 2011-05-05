@@ -6,9 +6,9 @@ require 'digest/md5'
 require 'date'
 
 class String
-  def inflate ; Zlib::Inflate.inflate self ; end
-  def deflate ; Zlib::Deflate.deflate self ; end
-  def sha2 ; Digest::SHA2.hexdigest self ; end
+  def inflate() Zlib::Inflate.inflate(self) end
+  def deflate() Zlib::Deflate.deflate(self, Zlib::BEST_SPEED) end
+  def sha2() Digest::SHA2.hexdigest(self) end
 end
 
 Revision = Struct.new(:id, :time, :ztext, :hash, :reverted)
@@ -20,8 +20,9 @@ worth_processing = false
 $all_revisions = []
 
 def flush_page
+  $all_revisions = $all_revisions.sort_by {|r| r['time'] }
   handle_reversions
-  window = [Revision.new(0,0,"".deflate,"",0)] * 7
+  window = [Revision.new(0,0,"".deflate,"",0)] * 5
   $all_revisions.each {|r|
     rtext = r['ztext'].inflate
     window_text = window.map {|wrev| wrev['ztext'].inflate }.join
@@ -35,12 +36,13 @@ end
 def handle_reversions
   hashes = Hash.new([])
   $all_revisions.each_with_index {|r,i| hashes[r['hash']] += [i] }
-  $all_revisions.reverse.each {|r|
+  $all_revisions.size.-(1).downto(0) {|i|
+    r = $all_revisions[i]
     next unless r['reverted'].zero?
     reversion_window = hashes[r['hash']]
-    next if reversion_window.size == 1
-    (reversion_window.first+1 ... reversion_window.last).each {|j| $all_revisions[j]['reverted'] = 1 }
-    hashes[r['hash']] = [reversion_window.first]
+    reversion_window.pop
+    next if reversion_window.empty?
+    (reversion_window.last+1 ... i).each {|j| $all_revisions[j]['reverted'] = i-j }
   }
 end
 
