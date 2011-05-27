@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'zlib'
 require 'nokogiri'
-require 'lzma'
+require 'json'
 require 'digest/md5'
 require 'date'
 
@@ -25,9 +25,9 @@ def flush_page
   window = [Revision.new(0,0,"".deflate,"",0)] * 5
   $all_revisions.each {|r|
     rtext = r['ztext'].inflate
-    window_text = window.map {|wrev| wrev['ztext'].inflate }.join
-    size_difference = LZMA.compress(window_text + rtext).size - LZMA.compress(window_text).size
-    STDOUT.print(r['id'], window.last['id'], size_difference, rtext.size, r['hash'], r['reverted'])
+    window_text = window.map {|wrev| wrev['ztext'] }
+    STDOUT.puts(JSON.dump({'id' => r['id'], 'last_id' => window.last['id'], 'text' => r['ztext'],
+                           'window' => window_text, 'hash' => r['hash'], 'reverted' => r['reverted']}))
     window = window[1..-1] + [r] if r['reverted'].zero?
   }
   $all_revisions = []
