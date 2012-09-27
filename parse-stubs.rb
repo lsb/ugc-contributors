@@ -6,17 +6,14 @@ require 'nokogiri'
 require 'ipaddr'
 require 'date'
 require 'digest/md5'
-require 'english'
 
 Billion = 1_000_000_000
-$OFS = '|'
+$, = '|'
 
 IO.popen('sort -u > users.tsv','w') {|uf| # id, name
   File.open('pages.tsv','w') {|pf| # id, title
     File.open('revisions.tsv','w') {|rf| # id, user_id, page_id, epochtime
       STDIN.each('</page>') {|page|
-        next unless page =~ /<title>M/
-
         nokopage = Nokogiri::XML(page)
 
         page_id = nokopage.at('page > id').text

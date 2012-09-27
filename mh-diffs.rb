@@ -50,7 +50,7 @@ STDIN.each('</revision>') {|r|
   maybe_new_title = r[%r%<title>(.+)</title>%,1]  # cheap trick: a pages' title always comes before its revisions
   if maybe_new_title
     flush_page if worth_processing
-    worth_processing = maybe_new_title =~ /^M/ && !maybe_new_title.include?(':')
+    worth_processing = !maybe_new_title.include?(':')
   end
   next unless worth_processing
   revision = Nokogiri::HTML(r)
